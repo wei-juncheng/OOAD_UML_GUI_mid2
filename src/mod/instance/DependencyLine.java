@@ -3,9 +3,14 @@ package mod.instance;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Polygon;
+import java.awt.Stroke;
+import java.awt.BasicStroke;
 
 import javax.swing.JPanel;
+import javax.swing.plaf.synth.SynthStyle;
 
 import Define.AreaDefine;
 import Pack.DragPack;
@@ -17,12 +22,13 @@ import java.lang.Math;
 public class DependencyLine extends JPanel
 		implements IFuncComponent, ILinePainter
 {
-	JPanel				from;
-	int					fromSide;
-	Point				fp				= new Point(0, 0);
-	JPanel				to;
-	int					toSide;
-	Point				tp				= new Point(0, 0);
+	public JPanel		from;
+	public int			fromSide;
+	public Point		fp				= new Point(0, 0);
+	public JPanel		to;
+	public int			toSide;
+	public int			arrowSize		= 6;
+	public Point		tp				= new Point(0, 0);
 	boolean				isSelect		= false;
 	int					selectBoxSize	= 5;
 	CanvasPanelHandler	cph;
@@ -45,7 +51,14 @@ public class DependencyLine extends JPanel
 				fp.y - this.getLocation().y);
 		tpPrime = new Point(tp.x - this.getLocation().x,
 				tp.y - this.getLocation().y);
-		g.drawLine(fpPrime.x, fpPrime.y, tpPrime.x, tpPrime.y);
+		// Create a copy of the Graphics instance
+		 Graphics2D g2d = (Graphics2D) g.create();
+		// Set the stroke of the copy, not the original 
+		Stroke dashed = new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,0, new float[]{9}, 0);
+		g2d.setStroke(dashed);
+		// Draw to the copy
+		g2d.drawLine(fpPrime.x, fpPrime.y, tpPrime.x, tpPrime.y);
+		g2d.dispose();
 		paintArrow(g, tpPrime);
 		if (isSelect == true)
 		{
@@ -65,12 +78,44 @@ public class DependencyLine extends JPanel
 	@Override
 	public void paintArrow(Graphics g, Point point)
 	{
-		// TODO Auto-generated method stub
+		int x[] =
+		{point.x, point.x - arrowSize, point.x, point.x + arrowSize};
+		int y[] =
+		{point.y + arrowSize, point.y, point.y - arrowSize, point.y};
+		switch (toSide)
+		{
+			case 0:
+				x = removeAt(x, 0);
+				y = removeAt(y, 0);
+				break;
+			case 1:
+				x = removeAt(x, 1);
+				y = removeAt(y, 1);
+				break;
+			case 2:
+				x = removeAt(x, 3);
+				y = removeAt(y, 3);
+				break;
+			case 3:
+				x = removeAt(x, 2);
+				y = removeAt(y, 2);
+				break;
+			default:
+				break;
+		}
+		Polygon polygon = new Polygon(x, y, x.length);
+		g.setColor(Color.WHITE);
+		g.fillPolygon(polygon);
+		g.setColor(Color.BLACK);
+		g.drawPolygon(polygon);
 	}
 
 	@Override
 	public void setConnect(DragPack dPack)
 	{
+		//dPack.getFrom()跟dPack.getTo()返回滑鼠拖曳的起終點絕對座標
+		System.out.println("dPack.getFrom().x: "+dPack.getFrom().x+" dPack.getFrom().y: "+dPack.getFrom().y);
+		System.out.println("dPack.getTo().y: "+dPack.getTo().y+" dPack.getTo().y: "+dPack.getTo().y);
 		Point mfp = dPack.getFrom();
 		Point mtp = dPack.getTo();
 		from = (JPanel) dPack.getFromObj();
@@ -126,6 +171,23 @@ public class DependencyLine extends JPanel
 		{
 			temp = null;
 			System.err.println("getConnectPoint fail:" + side);
+		}
+		return temp;
+	}
+
+	int[] removeAt(int arr[], int index)
+	{
+		int temp[] = new int[arr.length - 1];
+		for (int i = 0; i < temp.length; i ++)
+		{
+			if (i < index)
+			{
+				temp[i] = arr[i];
+			}
+			else if (i >= index)
+			{
+				temp[i] = arr[i + 1];
+			}
 		}
 		return temp;
 	}
