@@ -11,6 +11,7 @@ import java.util.Vector;
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
+import Define.AreaDefine;
 import Listener.CPHActionListener;
 import Pack.DragPack;
 import Pack.SendText;
@@ -107,28 +108,76 @@ public class CanvasPanelHandler extends PanelHandler
 		contextPanel.updateUI();
 	}
 
+	public boolean compare_from_and_to_obj(JPanel selected_obj,int selected_port_num,  JPanel check_from_obj, JPanel check_to_obj, int fromSide, int toSide){
+		if ((selected_obj.equals(check_from_obj) | selected_obj.equals(check_to_obj)) &  (selected_port_num ==fromSide || selected_port_num==toSide) ) {
+			return true;
+		}
+		 return false;
+	}
+
+	public void get_highlight_line(JPanel selected_obj, int selected_port_num)
+	{
+		for (int i = 0; i < contextPanel.getComponents().length; i ++){
+			boolean is_selected_obj = false;
+			// System.out.println("get_highlight_line contextPanel.getComponents().length: "+contextPanel.getComponents().length);
+			switch (core.isLine(contextPanel.getComponent(i)))
+				{
+					case 0: //AssociationLine
+						is_selected_obj = compare_from_and_to_obj(selected_obj  , selected_port_num, ((AssociationLine) contextPanel.getComponent(i)).from , ((AssociationLine) contextPanel.getComponent(i)).to, ((AssociationLine) contextPanel.getComponent(i)).fromSide, ((AssociationLine) contextPanel.getComponent(i)).toSide);
+						break;
+					case 1: //CompositionLine
+						is_selected_obj = compare_from_and_to_obj(selected_obj  , selected_port_num,  ((CompositionLine) contextPanel.getComponent(i)).from, ((CompositionLine) contextPanel.getComponent(i)).to, ((CompositionLine) contextPanel.getComponent(i)).fromSide, ((CompositionLine) contextPanel.getComponent(i)).toSide);
+						break;
+					case 2: //GeneralizationLine
+						is_selected_obj = compare_from_and_to_obj(selected_obj  , selected_port_num,  ((GeneralizationLine) contextPanel.getComponent(i)).from, ((GeneralizationLine) contextPanel.getComponent(i)).to, ((GeneralizationLine) contextPanel.getComponent(i)).fromSide, ((GeneralizationLine) contextPanel.getComponent(i)).toSide);
+						break;
+					case 6: //DependencyLine
+						is_selected_obj = compare_from_and_to_obj(selected_obj  , selected_port_num,  ((DependencyLine) contextPanel.getComponent(i)).from, ((DependencyLine) contextPanel.getComponent(i)).to, ((DependencyLine) contextPanel.getComponent(i)).fromSide, ((DependencyLine) contextPanel.getComponent(i)).toSide);
+						break;
+					default:
+						break;
+				}
+
+			if(is_selected_obj){
+				System.out.println(contextPanel.getComponent(i));
+			}
+
+		}
+
+	}
+
 	void selectByClick(MouseEvent e)
 	{
 		boolean isSelect = false;
 		selectComp = new Vector <>();
+		System.out.println("X: "+e.getPoint().x + " Y:"+ e.getPoint().y); //滑鼠點擊絕對位置
 		for (int i = 0; i < members.size(); i ++)
 		{
 			if (isInside(members.elementAt(i), e.getPoint()) == true
 					&& isSelect == false)
 			{
+				// System.out.println("members.elementAt(i).getLocation(): "+members.elementAt(i).getLocation());
+				// System.out.println("e.getPoint(): " + e.getPoint());
+				// System.out.println("getArea(): "+ new AreaDefine().getArea(members.elementAt(i).getLocation(), members.elementAt(i).getSize(), e.getPoint()));
+				int selected_port_num = new AreaDefine().getArea(members.elementAt(i).getLocation(), members.elementAt(i).getSize(), e.getPoint());
+				
 				switch (core.isFuncComponent(members.elementAt(i)))
 				{
-					case 0:
+					case 0: //isBasicClass
 						((BasicClass) members.elementAt(i)).setSelect(true);
 						selectComp.add(members.elementAt(i));
 						isSelect = true;
+
+						get_highlight_line(members.elementAt(i), selected_port_num);
 						break;
-					case 1:
+					case 1: //isUseCase
 						((UseCase) members.elementAt(i)).setSelect(true);
 						selectComp.add(members.elementAt(i));
 						isSelect = true;
+
+						get_highlight_line(members.elementAt(i), selected_port_num);
 						break;
-					case 5:
+					case 5: //isGroupContainer
 						Point p = e.getPoint();
 						p.x -= members.elementAt(i).getLocation().x;
 						p.y -= members.elementAt(i).getLocation().y;
@@ -145,7 +194,10 @@ public class CanvasPanelHandler extends PanelHandler
 							((GroupContainer) members.elementAt(i))
 									.setSelect(false);
 						}
+
 						break;
+					case 6:
+						System.out.println("selectByClick 6");
 					default:
 						break;
 				}
@@ -363,6 +415,7 @@ public class CanvasPanelHandler extends PanelHandler
 	{
 		for (int i = 0; i < members.size(); i ++)
 		{
+			//確認拖曳的動作起點、終點為何
 			if (isInside(members.elementAt(i), dPack.getFrom()) == true)
 			{
 				dPack.setFromObj(members.elementAt(i));
@@ -372,6 +425,9 @@ public class CanvasPanelHandler extends PanelHandler
 				dPack.setToObj(members.elementAt(i));
 			}
 		}
+		//如果起點跟終點都是同一個物件裡面
+		//或
+		//起點跟終點有一個不是物件（點在空白的地方）
 		if (dPack.getFromObj() == dPack.getToObj()
 				|| dPack.getFromObj() == contextPanel
 				|| dPack.getToObj() == contextPanel)
@@ -380,10 +436,12 @@ public class CanvasPanelHandler extends PanelHandler
 		}
 		switch (members.size())
 		{
+			//1個以下的物件不能連線
 			case 0:
 			case 1:
 				break;
 			default:
+				System.out.println("addLine core.isLine(funcObj):"+core.isLine(funcObj));
 				switch (core.isLine(funcObj))
 				{
 					case 0:

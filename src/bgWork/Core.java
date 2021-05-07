@@ -120,7 +120,6 @@ public class Core extends InitProcess
 		}
 		else if(isDependencyLine(obj))
 		{
-			System.out.println("isLine: isDependencyLine");
 			return 6;
 		}
 		return -1;

@@ -17,12 +17,12 @@ import java.lang.Math;
 public class AssociationLine extends JPanel
 		implements IFuncComponent, ILinePainter
 {
-	JPanel				from;
-	int					fromSide;
-	Point				fp				= new Point(0, 0);
-	JPanel				to;
-	int					toSide;
-	Point				tp				= new Point(0, 0);
+	public JPanel		from;
+	public int					fromSide;
+	public Point				fp				= new Point(0, 0);
+	public JPanel		to;
+	public int					toSide;
+	public Point				tp				= new Point(0, 0);
 	boolean				isSelect		= false;
 	int					selectBoxSize	= 5;
 	CanvasPanelHandler	cph;
@@ -71,6 +71,7 @@ public class AssociationLine extends JPanel
 	@Override
 	public void setConnect(DragPack dPack)
 	{
+		//計算哪兩個物件相連，並取得最近的Port 
 		Point mfp = dPack.getFrom();
 		Point mtp = dPack.getTo();
 		from = (JPanel) dPack.getFromObj();

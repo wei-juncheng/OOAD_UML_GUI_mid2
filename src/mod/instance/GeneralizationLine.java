@@ -18,12 +18,12 @@ import java.lang.Math;
 public class GeneralizationLine extends JPanel
 		implements IFuncComponent, ILinePainter
 {
-	JPanel				from;
-	int					fromSide;
-	Point				fp				= new Point(0, 0);
-	JPanel				to;
-	int					toSide;
-	Point				tp				= new Point(0, 0);
+	public JPanel		from;
+	public int			fromSide;
+	public Point		fp				= new Point(0, 0);
+	public JPanel		to;
+	public int			toSide;
+	public Point		tp				= new Point(0, 0);
 	int					arrowSize		= 6;
 	int					panelExtendSize	= 10;
 	boolean				isSelect		= false;
