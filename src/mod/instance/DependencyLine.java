@@ -32,6 +32,7 @@ public class DependencyLine extends JPanel
 	boolean				isSelect		= false;
 	int					selectBoxSize	= 5;
 	CanvasPanelHandler	cph;
+	public boolean		is_highlight	= false;
 
 	public DependencyLine(CanvasPanelHandler cph)
 	{
@@ -53,6 +54,9 @@ public class DependencyLine extends JPanel
 				tp.y - this.getLocation().y);
 		// Create a copy of the Graphics instance
 		 Graphics2D g2d = (Graphics2D) g.create();
+		 if (is_highlight) {
+			g2d.setColor(Color.RED);
+		}
 		// Set the stroke of the copy, not the original 
 		Stroke dashed = new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,0, new float[]{9}, 0);
 		g2d.setStroke(dashed);

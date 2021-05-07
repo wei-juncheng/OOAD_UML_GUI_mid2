@@ -108,8 +108,30 @@ public class CanvasPanelHandler extends PanelHandler
 		contextPanel.updateUI();
 	}
 
+	//對所有的線進行操作（highlight或取消highlight）
+	void setHighlightAllType(Object obj, boolean isHighlight)
+	{
+		switch (core.isFuncComponent(obj))
+		{
+			case 2:
+				((AssociationLine) obj).is_highlight = isHighlight;
+				break;
+			case 3:
+				((CompositionLine) obj).is_highlight = isHighlight;
+				break;
+			case 4:
+				((GeneralizationLine) obj).is_highlight = isHighlight;
+				break;
+			case 6:
+				((DependencyLine) obj).is_highlight = isHighlight;
+				break;
+			default:
+				break;
+		}
+	}
+
 	public boolean compare_from_and_to_obj(JPanel selected_obj,int selected_port_num,  JPanel check_from_obj, JPanel check_to_obj, int fromSide, int toSide){
-		if ((selected_obj.equals(check_from_obj) | selected_obj.equals(check_to_obj)) &  (selected_port_num ==fromSide || selected_port_num==toSide) ) {
+		if(  (selected_obj.equals(check_from_obj) && (selected_port_num ==fromSide))   ||     (selected_obj.equals(check_to_obj) && (selected_port_num==toSide))  ){
 			return true;
 		}
 		 return false;
@@ -119,28 +141,58 @@ public class CanvasPanelHandler extends PanelHandler
 	{
 		for (int i = 0; i < contextPanel.getComponents().length; i ++){
 			boolean is_selected_obj = false;
-			// System.out.println("get_highlight_line contextPanel.getComponents().length: "+contextPanel.getComponents().length);
-			switch (core.isLine(contextPanel.getComponent(i)))
+
+			int component_type = core.isLine(contextPanel.getComponent(i));
+			switch (component_type)
 				{
 					case 0: //AssociationLine
 						is_selected_obj = compare_from_and_to_obj(selected_obj  , selected_port_num, ((AssociationLine) contextPanel.getComponent(i)).from , ((AssociationLine) contextPanel.getComponent(i)).to, ((AssociationLine) contextPanel.getComponent(i)).fromSide, ((AssociationLine) contextPanel.getComponent(i)).toSide);
+						//這個Line是被選中的，要Highlight
+						if(is_selected_obj){
+							System.out.println("選中： "+ contextPanel.getComponent(i));
+							((AssociationLine) contextPanel.getComponent(i)).is_highlight = true;
+						}
+						else{ //沒有被highlight的線
+							((AssociationLine) contextPanel.getComponent(i)).is_highlight = false;
+						}
 						break;
 					case 1: //CompositionLine
 						is_selected_obj = compare_from_and_to_obj(selected_obj  , selected_port_num,  ((CompositionLine) contextPanel.getComponent(i)).from, ((CompositionLine) contextPanel.getComponent(i)).to, ((CompositionLine) contextPanel.getComponent(i)).fromSide, ((CompositionLine) contextPanel.getComponent(i)).toSide);
+						//這個Line是被選中的，要Highlight
+						if(is_selected_obj){
+							System.out.println("選中： "+ contextPanel.getComponent(i));
+							((CompositionLine) contextPanel.getComponent(i)).is_highlight = true;
+						}
+						else{ //沒有被highlight的線
+							((CompositionLine) contextPanel.getComponent(i)).is_highlight = false;
+						}
 						break;
 					case 2: //GeneralizationLine
 						is_selected_obj = compare_from_and_to_obj(selected_obj  , selected_port_num,  ((GeneralizationLine) contextPanel.getComponent(i)).from, ((GeneralizationLine) contextPanel.getComponent(i)).to, ((GeneralizationLine) contextPanel.getComponent(i)).fromSide, ((GeneralizationLine) contextPanel.getComponent(i)).toSide);
+						//這個Line是被選中的，要Highlight
+						if(is_selected_obj){
+							System.out.println("選中： "+ contextPanel.getComponent(i));
+							((GeneralizationLine) contextPanel.getComponent(i)).is_highlight = true;
+						}
+						else{ //沒有被highlight的線
+							((GeneralizationLine) contextPanel.getComponent(i)).is_highlight = false;
+						}
 						break;
 					case 6: //DependencyLine
 						is_selected_obj = compare_from_and_to_obj(selected_obj  , selected_port_num,  ((DependencyLine) contextPanel.getComponent(i)).from, ((DependencyLine) contextPanel.getComponent(i)).to, ((DependencyLine) contextPanel.getComponent(i)).fromSide, ((DependencyLine) contextPanel.getComponent(i)).toSide);
+						//這個Line是被選中的，要Highlight
+						if(is_selected_obj){
+							System.out.println("選中： "+ contextPanel.getComponent(i));
+							((DependencyLine) contextPanel.getComponent(i)).is_highlight = true;
+						}
+						else{ //沒有被highlight的線
+							((DependencyLine) contextPanel.getComponent(i)).is_highlight = false;
+						}
 						break;
 					default:
 						break;
 				}
 
-			if(is_selected_obj){
-				System.out.println(contextPanel.getComponent(i));
-			}
 
 		}
 
@@ -197,7 +249,6 @@ public class CanvasPanelHandler extends PanelHandler
 
 						break;
 					case 6:
-						System.out.println("selectByClick 6");
 					default:
 						break;
 				}
@@ -205,6 +256,12 @@ public class CanvasPanelHandler extends PanelHandler
 			else
 			{
 				setSelectAllType(members.elementAt(i), false);
+			}
+		}
+		if (isSelect==false) {
+			System.out.println("沒有物件被選取，清空紅線");
+			for (int q = 0; q < contextPanel.getComponents().length; q ++){
+				setHighlightAllType(contextPanel.getComponent(q), false);
 			}
 		}
 		repaintComp();

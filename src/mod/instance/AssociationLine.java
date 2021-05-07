@@ -26,6 +26,7 @@ public class AssociationLine extends JPanel
 	boolean				isSelect		= false;
 	int					selectBoxSize	= 5;
 	CanvasPanelHandler	cph;
+	public boolean		is_highlight	= false;
 
 	public AssociationLine(CanvasPanelHandler cph)
 	{
@@ -45,6 +46,10 @@ public class AssociationLine extends JPanel
 				fp.y - this.getLocation().y);
 		tpPrime = new Point(tp.x - this.getLocation().x,
 				tp.y - this.getLocation().y);
+		g.setColor(Color.BLACK);
+		if (is_highlight) {
+			g.setColor(Color.RED);
+		}
 		g.drawLine(fpPrime.x, fpPrime.y, tpPrime.x, tpPrime.y);
 		paintArrow(g, tpPrime);
 		if (isSelect == true)
